@@ -1,0 +1,51 @@
+= Scala Academy Exam Challange 3
+
+*The content of the task:*
+Write a dockerized Scala application that reads a file from a directory and solves the following assignment: https://github.com/hubert-skowronek/scala-academy-dockerized-app
+
+:library: Asciidoctor
+:idprefix:
+:numbered:
+:imagesdir: images
+:experimental:
+:toc: preamble
+:toc-title: pass:[<h3>Table od contents</h3>]
+ifdef::env-github[]
+:note-caption: :information_source:
+:tip-caption: :bulb:
+endif::[]
+
+*Dependencies*
+
+To run this app you need IDE(i use InteliJ), Scala and Docker
+
+You need also add to your build.sbt:
+
+----
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.1"
+enablePlugins(DockerPlugin)
+
+docker / dockerfile := {
+  val jarFile: File = (Compile / packageBin / sbt.Keys.`package`).value
+  val jarTarget = s"/opt/spark/jars/${jarFile.getName}"
+  new Dockerfile {
+    from("spark:v3.2.1")
+    add(jarFile, jarTarget)
+    user("root")
+    entryPoint("/opt/spark/bin/spark-submit", "--conf", "spark.jars.ivy=/tmp/.ivy", jarTarget)
+  }
+}
+
+docker / imageNames := Seq(
+  ImageName(s"${organization.value}/${name.value}:${version.value}")
+)
+----
+
+*How to run?*
+
+Clone this repository.
+
+*Troubleshooting*
+
+To be honest, i completely forgot how to dockerize. I am also aware that
+i should not use Spark, but i dont know how to solve this challenge other than Spark SQL.
